@@ -1,4 +1,6 @@
 class PrototypesController < ApplicationController
+  before_action :authenticate_user!, except: [:index, :show]
+  
   def new
     @prototype = Prototype.new
   end
@@ -6,7 +8,7 @@ class PrototypesController < ApplicationController
   def create
     @prototype = Prototype.new(prototype_params)
     if @prototype.save
-      redirect_to root_path
+      redirect_to prototypes_path
     else
       render :new
     end
@@ -18,10 +20,15 @@ class PrototypesController < ApplicationController
 
   def show
     @prototype = Prototype.find(params[:id])
+    @comment = Comment.new
+    @comments = @prototype.comments.includes(:user)
   end
 
   def edit
     @prototype = Prototype.find(params[:id])
+    unless current_user == @prototype.user
+      redirect_to root_path
+    end
   end
 
   def update
